@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows에서 리눅스 실행 방식</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .methods-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .method-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .method-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .method-title {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .architecture {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            min-height: 350px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .layer {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+            position: relative;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .layer.hardware {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .layer.windows {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .layer.hypervisor {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .layer.vm {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .layer.container {
+            background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+            animation: slide 3s ease-in-out infinite;
+        }
+
+        .layer.wsl {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        @keyframes slide {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(5px); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
+        }
+
+        .description {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .pros, .cons {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .pros h3 {
+            color: #4ade80;
+            margin-bottom: 10px;
+        }
+
+        .cons h3 {
+            color: #f87171;
+            margin-bottom: 10px;
+        }
+
+        .pros ul, .cons ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .pros li::before {
+            content: "✓ ";
+            color: #4ade80;
+            font-weight: bold;
+        }
+
+        .cons li::before {
+            content: "✗ ";
+            color: #f87171;
+            font-weight: bold;
+        }
+
+        .arrow {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 5px 0;
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .data-flow {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+            animation: flow 2s linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes flow {
+            0% { transform: translateY(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(300px); opacity: 0; }
+        }
+
+        .info-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            margin-top: 30px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .comparison-table th {
+            background: rgba(255, 255, 255, 0.1);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🐧 Windows에서 리눅스 실행 방식 비교</h1>
+
+    <div class="methods-container">
+        <!-- Hyper-V 방식 -->
+        <div class="method-card">
+            <div class="method-title">🖥️ Hyper-V 방식</div>
+            <div class="architecture">
+                <div class="layer hardware">하드웨어 (CPU, 메모리, 디스크)</div>
+                <div class="arrow">↑</div>
+                <div class="layer hypervisor">Hyper-V 하이퍼바이저</div>
+                <div class="arrow">↑</div>
+                <div class="layer windows">Windows OS</div>
+                <div class="arrow">↑</div>
+                <div class="layer vm">Linux VM (완전한 독립 OS)</div>
+                <div class="data-flow" style="left: 50%; animation-delay: 0s;"></div>
+                <div class="data-flow" style="left: 30%; animation-delay: 0.5s;"></div>
+                <div class="data-flow" style="left: 70%; animation-delay: 1s;"></div>
+            </div>
+            <div class="description">
+                <strong>작동 원리:</strong> 하드웨어 가상화 기술을 사용하여 완전히 독립적인 가상 머신을 생성합니다. 각 VM은 자체 커널과 전체 OS를 실행합니다.
+            </div>
+            <div class="pros-cons">
+                <div class="pros">
+                    <h3>장점</h3>
+                    <ul>
+                        <li>완전한 격리</li>
+                        <li>다양한 OS 지원</li>
+                        <li>보안성 우수</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <h3>단점</h3>
+                    <ul>
+                        <li>높은 리소스 사용</li>
+                        <li>부팅 시간 길음</li>
+                        <li>성능 오버헤드</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Windows 컨테이너 방식 -->
+        <div class="method-card">
+            <div class="method-title">📦 Windows 컨테이너 방식</div>
+            <div class="architecture">
+                <div class="layer hardware">하드웨어</div>
+                <div class="arrow">↑</div>
+                <div class="layer windows">Windows OS 커널</div>
+                <div class="arrow">↑</div>
+                <div class="layer container">컨테이너 런타임 (Docker)</div>
+                <div class="arrow">↑</div>
+                <div class="layer container">Linux 컨테이너들</div>
+                <div style="font-size: 0.9em; margin-top: 10px; text-align: center;">
+                    (커널 공유, 프로세스 격리)
+                </div>
+                <div class="data-flow" style="left: 50%; animation-delay: 0s;"></div>
+                <div class="data-flow" style="left: 40%; animation-delay: 0.7s;"></div>
+                <div class="data-flow" style="left: 60%; animation-delay: 1.4s;"></div>
+            </div>
+            <div class="description">
+                <strong>작동 원리:</strong> OS 수준 가상화로 호스트 커널을 공유하면서 프로세스와 파일시스템을 격리합니다. 가벼운 가상화 방식입니다.
+            </div>
+            <div class="pros-cons">
+                <div class="pros">
+                    <h3>장점</h3>
+                    <ul>
+                        <li>빠른 시작 속도</li>
+                        <li>낮은 리소스 사용</li>
+                        <li>쉬운 배포</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <h3>단점</h3>
+                    <ul>
+                        <li>커널 공유 제약</li>
+                        <li>격리 수준 낮음</li>
+                        <li>호환성 제한</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- WSL 방식 -->
+        <div class="method-card">
+            <div class="method-title">⚡ WSL (Windows Subsystem for Linux)</div>
+            <div class="architecture">
+                <div class="layer hardware">하드웨어</div>
+                <div class="arrow">↑</div>
+                <div class="layer windows">Windows NT 커널</div>
+                <div class="arrow">↑</div>
+                <div class="layer wsl">WSL Translation Layer</div>
+                <div class="arrow">↑</div>
+                <div class="layer wsl">Linux 환경 (네이티브 바이너리)</div>
+                <div style="font-size: 0.9em; margin-top: 10px; text-align: center;">
+                    (시스템 콜 변환, 경량 VM)
+                </div>
+                <div class="data-flow" style="left: 50%; animation-delay: 0s;"></div>
+                <div class="data-flow" style="left: 35%; animation-delay: 0.6s;"></div>
+                <div class="data-flow" style="left: 65%; animation-delay: 1.2s;"></div>
+            </div>
+            <div class="description">
+                <strong>작동 원리:</strong> WSL2는 경량화된 VM에서 실제 Linux 커널을 실행하며, Windows와 긴밀하게 통합됩니다. 시스템 콜을 빠르게 변환합니다.
+            </div>
+            <div class="pros-cons">
+                <div class="pros">
+                    <h3>장점</h3>
+                    <ul>
+                        <li>Windows와 통합</li>
+                        <li>빠른 성능</li>
+                        <li>낮은 오버헤드</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <h3>단점</h3>
+                    <ul>
+                        <li>GUI 제한적</li>
+                        <li>일부 기능 미지원</li>
+                        <li>Windows 전용</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-section">
+        <h2 style="text-align: center; margin-bottom: 20px;">📊 상세 비교표</h2>
+        <table class="comparison-table">
+            <thead>
+            <tr>
+                <th>특성</th>
+                <th>Hyper-V</th>
+                <th>Windows 컨테이너</th>
+                <th>WSL</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><strong>리소스 사용</strong></td>
+                <td>높음</td>
+                <td>낮음</td>
+                <td>매우 낮음</td>
+            </tr>
+            <tr>
+                <td><strong>시작 시간</strong></td>
+                <td>느림 (분)</td>
+                <td>빠름 (초)</td>
+                <td>매우 빠름 (즉시)</td>
+            </tr>
+            <tr>
+                <td><strong>격리 수준</strong></td>
+                <td>완전 격리</td>
+                <td>프로세스 격리</td>
+                <td>중간 격리</td>
+            </tr>
+            <tr>
+                <td><strong>주요 용도</strong></td>
+                <td>서버, 다중 OS</td>
+                <td>마이크로서비스</td>
+                <td>개발 환경</td>
+            </tr>
+            <tr>
+                <td><strong>Windows 통합</strong></td>
+                <td>낮음</td>
+                <td>중간</td>
+                <td>높음</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // 데이터 플로우 애니메이션 추가
+    document.querySelectorAll('.architecture').forEach(arch => {
+        setInterval(() => {
+            const flow = document.createElement('div');
+            flow.className = 'data-flow';
+            flow.style.left = Math.random() * 80 + 10 + '%';
+            arch.appendChild(flow);
+
+            setTimeout(() => {
+                flow.remove();
+            }, 2000);
+        }, 1000);
+    });
+
+    // 카드 호버 효과
+    document.querySelectorAll('.method-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.background = 'rgba(255, 255, 255, 0.15)';
+        });
+
+        card.addEventListener('mouseleave', function() {
+            this.style.background = 'rgba(255, 255, 255, 0.1)';
+        });
+    });
+</script>
+</body>
+</html>
